@@ -73,4 +73,4 @@ api.add_resource(UnitList, '/unit')
 api.add_resource(AddAccount, '/account')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000, debug=True)
