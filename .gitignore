@@ -37,3 +37,6 @@ Pipfile.lock
 
 # lockfiles
 *.lock
+
+# dsstore
+.DS_Store
