@@ -34,3 +34,6 @@ coverage.xml
 # pipfiles
 Pipfile
 Pipfile.lock
+
+# lockfiles
+*.lock
