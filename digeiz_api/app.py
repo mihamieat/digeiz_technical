@@ -9,12 +9,7 @@ api = Api(app)
 
 accounts = []
 
-malls = [
-    {
-        'name': 'some_mall',
-        'id': 1
-    }
-]
+malls = []
 
 units = [
     {
@@ -65,10 +60,37 @@ class AddAccount(Resource):
 
         return account, 201
 
+class AddMall(Resource):
+    """Create a new mall linked to an account with /mall endpoint."""
+    
+    parser = reqparse.RequestParser()
+    parser.add_argument('name',
+        type=str,
+        required=True,
+        help="This field cannot be left blank!"
+    )
+
+    def post(self, account_id):
+        """Create a new mall if not existing to /mall/{account id}."""
+        account =  next(filter(lambda x: x['id'] == account_id, accounts), None)
+        
+        data = AddMall.parser.parse_args()
+
+        if account:
+            if next(filter(lambda x: x['name'] == data['name'], malls), None) is not None:
+                return {'message': "A mall with the name '{}' already exists in '{}' account.".format(data['name'], account['name'])}
+            mall_id = str(uuid.uuid1())
+            mall = {'name': data['name'], 'id': mall_id, 'account_id': account['id']}
+            malls.append(mall)
+            return mall, 201
+        else:
+            return {'message': 'This account does not exist.'}
+
 api.add_resource(AccountList, '/account')
 api.add_resource(MallList, '/mall')
 api.add_resource(UnitList, '/unit')
 api.add_resource(AddAccount, '/account')
+api.add_resource(AddMall, '/mall/<string:account_id>')
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
