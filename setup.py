@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # --------------------------------License Notice----------------------------------
 # Python Project Boilerplate - A boilerplate project for python packages
 #
