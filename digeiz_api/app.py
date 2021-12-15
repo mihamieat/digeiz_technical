@@ -50,22 +50,17 @@ class AddAccount(Resource):
         required=True,
         help="This field cannot be left blank!"
     )
-    parser.add_argument('password',
-        type=str,
-        required=True,
-        help="This field cannot be left blank!"
-    )
     
     def post(self):
         """Create an account if not existing."""
         
         data = AddAccount.parser.parse_args()
         if next(filter(lambda x: x['name'] == data['name'], accounts), None) is not None:
-            return {'message': "An account with the name '{}' already exists".format(data['name'])}
+            return {'message': "An account with the name '{}' already exists.".format(data['name'])}
         
         new_uuid = str(uuid.uuid1())
 
-        account = {'name': data['name'], 'id': new_uuid, 'password': data['password']}
+        account = {'name': data['name'], 'id': new_uuid}
         accounts.append(account)
 
         return account, 201
