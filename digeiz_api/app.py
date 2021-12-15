@@ -77,7 +77,7 @@ class AddMall(Resource):
         data = AddMall.parser.parse_args()
 
         if account:
-            if next(filter(lambda x: x['name'] == data['name'], malls), None) is not None:
+            if next(filter(lambda x: x['name'] == data['name'] and x['account_id'] == account_id, malls), None) is not None:
                 return {'message': "A mall with the name '{}' already exists in '{}' account.".format(data['name'], account['name'])}
             mall_id = str(uuid.uuid1())
             mall = {'name': data['name'], 'id': mall_id, 'account_id': account['id']}
