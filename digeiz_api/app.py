@@ -1,7 +1,6 @@
 import uuid
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
-from account import AccountInfo
 
 
 app = Flask(__name__)
