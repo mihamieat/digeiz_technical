@@ -30,3 +30,7 @@ pip-delete-this-directory.txt
 .cache
 nosetests.xml
 coverage.xml
+
+# pipfiles
+Pipfile
+Pipfile.lock
