@@ -11,12 +11,7 @@ accounts = []
 
 malls = []
 
-units = [
-    {
-        'name': 'some_unit',
-        'id': 1
-    }
-]
+units = []
 
 class AccountList(Resource):
     """Resource to get all accounts list from /account endpoint."""
@@ -86,11 +81,38 @@ class AddMall(Resource):
         else:
             return {'message': 'This account does not exist.'}
 
+class AddUnit(Resource):
+    """Create a new unit linked to an mall with /unit endpoint."""
+    
+    parser = reqparse.RequestParser()
+    parser.add_argument('name',
+        type=str,
+        required=True,
+        help="This field cannot be left blank!"
+    )
+
+    def post(self, mall_id):
+        """Create a new unit if not existing to /unit/{mall id}."""
+        mall = next(filter(lambda x: x['id'] == mall_id, malls), None)
+        
+        data = AddUnit.parser.parse_args()
+
+        if mall:
+            if next(filter(lambda x: x['name'] == data['name'] and x['mall_id'] == mall_id, units), None) is not None:
+                return {'message': "A unit with the name '{}' already exists in '{}' mall.".format(data['name'], mall['name'])}
+            unit_id = str(uuid.uuid1())
+            unit = {'name': data['name'], 'id': unit_id, 'mall_id': mall['id']}
+            units.append(unit)
+            return unit, 201
+        else:
+            return {'message': 'This mall does not exist.'}
+
 api.add_resource(AccountList, '/account')
 api.add_resource(MallList, '/mall')
 api.add_resource(UnitList, '/unit')
 api.add_resource(AddAccount, '/account')
 api.add_resource(AddMall, '/mall/<string:account_id>')
+api.add_resource(AddUnit, '/unit/<string:mall_id>')
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
