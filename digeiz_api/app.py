@@ -1,6 +1,7 @@
 import uuid
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from account import AccountInfo
 
 
 app = Flask(__name__)
@@ -107,12 +108,20 @@ class AddUnit(Resource):
         else:
             return {'message': 'This mall does not exist.'}
 
+class AccountInfo(Resource):
+    """Return info from a specific account."""
+    def get(self, account_id):
+        """/account/{account id} endpoint."""
+        account = next(filter(lambda x: x['id'] == account_id, accounts), None)
+        return {"account": account}, 200 if account else 404
+
 api.add_resource(AccountList, '/account')
 api.add_resource(MallList, '/mall')
 api.add_resource(UnitList, '/unit')
 api.add_resource(AddAccount, '/account')
 api.add_resource(AddMall, '/mall/<string:account_id>')
 api.add_resource(AddUnit, '/unit/<string:mall_id>')
+api.add_resource(AccountInfo, '/account/<string:account_id>')
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
