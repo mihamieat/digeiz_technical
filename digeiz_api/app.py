@@ -56,7 +56,7 @@ class AddAccount(Resource):
         return account, 201
 
 class AddMall(Resource):
-    """/mall endpoint."""
+    """/mall/{account id} endpoint."""
     
     parser = reqparse.RequestParser()
     parser.add_argument('name',
@@ -66,7 +66,7 @@ class AddMall(Resource):
     )
 
     def post(self, account_id):
-        """Create a new mall if not existing to /mall/{account id}."""
+        """Create a new mall if not existing."""
         account =  next(filter(lambda x: x['id'] == account_id, accounts), None)
         
         data = AddMall.parser.parse_args()
@@ -82,7 +82,7 @@ class AddMall(Resource):
             return {'message': 'This account does not exist.'}
 
 class AddUnit(Resource):
-    """/unit endpoint."""
+    """/unit/{mall id} endpoint."""
     
     parser = reqparse.RequestParser()
     parser.add_argument('name',
@@ -92,7 +92,7 @@ class AddUnit(Resource):
     )
 
     def post(self, mall_id):
-        """Create a new unit if not existing to /unit/{mall id}."""
+        """Create a new unit if not existing."""
         mall = next(filter(lambda x: x['id'] == mall_id, malls), None)
         
         data = AddUnit.parser.parse_args()
