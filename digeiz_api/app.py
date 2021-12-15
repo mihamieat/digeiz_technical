@@ -1,3 +1,4 @@
+import uuid
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 
@@ -61,8 +62,10 @@ class AddAccount(Resource):
         data = AddAccount.parser.parse_args()
         if next(filter(lambda x: x['name'] == data['name'], accounts), None) is not None:
             return {'message': "An account with the name '{}' already exists".format(data['name'])}
+        
+        new_uuid = str(uuid.uuid1())
 
-        account = {'name': data['name'], 'password': data['password']}
+        account = {'name': data['name'], 'id': new_uuid, 'password': data['password']}
         accounts.append(account)
 
         return account, 201
