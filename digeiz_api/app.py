@@ -114,6 +114,13 @@ class AccountInfo(Resource):
         account = next(filter(lambda x: x['id'] == account_id, accounts), None)
         return {"account": account}, 200 if account else 404
 
+class MallInfo(Resource):
+    """Return info from a specific mall."""
+    def get(self, mall_id):
+        """/mall/{mall id} endpoint."""
+        mall = next(filter(lambda x: x['id'] == mall_id, malls), None)
+        return {'mall': mall}, 200 if mall else 404
+
 api.add_resource(AccountList, '/account')
 api.add_resource(MallList, '/mall')
 api.add_resource(UnitList, '/unit')
@@ -121,6 +128,7 @@ api.add_resource(AddAccount, '/account')
 api.add_resource(AddMall, '/mall/<string:account_id>')
 api.add_resource(AddUnit, '/unit/<string:mall_id>')
 api.add_resource(AccountInfo, '/account/<string:account_id>')
+api.add_resource(MallInfo, '/mall/<string:mall_id>')
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
