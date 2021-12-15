@@ -15,9 +15,31 @@ units = []
 
 class AccountList(Resource):
     """/account endpoint."""
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('name',
+        type=str,
+        required=True,
+        help="This field cannot be left blank!"
+    )
+
     def get(self):
         """Get the account list method."""
         return {'accounts': accounts}
+
+    def post(self):
+        """Create an account if not existing."""
+        
+        data = AccountList.parser.parse_args()
+        if next(filter(lambda x: x['name'] == data['name'], accounts), None) is not None:
+            return {'message': "An account with the name '{}' already exists.".format(data['name'])}
+        
+        new_uuid = str(uuid.uuid1())
+
+        account = {'name': data['name'], 'id': new_uuid}
+        accounts.append(account)
+
+        return account, 201
 
 class MallList(Resource):
     """/mall endpoint."""
@@ -30,30 +52,6 @@ class UnitList(Resource):
     def get(self):
         """Get the account list method."""
         return {'units': units}
-
-class AddAccount(Resource):
-    """/account endpoint."""
-    
-    parser = reqparse.RequestParser()
-    parser.add_argument('name',
-        type=str,
-        required=True,
-        help="This field cannot be left blank!"
-    )
-    
-    def post(self):
-        """Create an account if not existing."""
-        
-        data = AddAccount.parser.parse_args()
-        if next(filter(lambda x: x['name'] == data['name'], accounts), None) is not None:
-            return {'message': "An account with the name '{}' already exists.".format(data['name'])}
-        
-        new_uuid = str(uuid.uuid1())
-
-        account = {'name': data['name'], 'id': new_uuid}
-        accounts.append(account)
-
-        return account, 201
 
 class AddMall(Resource):
     """/mall/{account id} endpoint."""
@@ -149,7 +147,6 @@ class Unit(Resource):
 api.add_resource(AccountList, '/account')
 api.add_resource(MallList, '/mall')
 api.add_resource(UnitList, '/unit')
-api.add_resource(AddAccount, '/account')
 api.add_resource(AddMall, '/mall/<string:account_id>')
 api.add_resource(AddUnit, '/unit/<string:mall_id>')
 api.add_resource(Account, '/account/<string:account_id>')
