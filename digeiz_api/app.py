@@ -14,25 +14,25 @@ malls = []
 units = []
 
 class AccountList(Resource):
-    """Resource to get all accounts list from /account endpoint."""
+    """/account endpoint."""
     def get(self):
         """Get the account list method."""
         return {'accounts': accounts}
 
 class MallList(Resource):
-    """Resource to get all malls list from /mall endpoint."""
+    """/mall endpoint."""
     def get(self):
         """Get the account list method."""
         return {'malls': malls}
 
 class UnitList(Resource):
-    """Resource to get all unit list from /unit endpoint."""
+    """/unit endpoint."""
     def get(self):
         """Get the account list method."""
         return {'units': units}
 
 class AddAccount(Resource):
-    """Create a new account from /account endpoint."""
+    """/account endpoint."""
     
     parser = reqparse.RequestParser()
     parser.add_argument('name',
@@ -56,7 +56,7 @@ class AddAccount(Resource):
         return account, 201
 
 class AddMall(Resource):
-    """Create a new mall linked to an account with /mall endpoint."""
+    """/mall endpoint."""
     
     parser = reqparse.RequestParser()
     parser.add_argument('name',
@@ -82,7 +82,7 @@ class AddMall(Resource):
             return {'message': 'This account does not exist.'}
 
 class AddUnit(Resource):
-    """Create a new unit linked to an mall with /unit endpoint."""
+    """/unit endpoint."""
     
     parser = reqparse.RequestParser()
     parser.add_argument('name',
@@ -107,10 +107,10 @@ class AddUnit(Resource):
         else:
             return {'message': 'This mall does not exist.'}
 
-class AccountInfo(Resource):
-    """Return info from a specific account."""
+class Account(Resource):
+    """/account/{account id} endpoint."""
     def get(self, account_id):
-        """/account/{account id} endpoint."""
+        """Return a specific account."""
         account = next(filter(lambda x: x['id'] == account_id, accounts), None)
         return {"account": account}, 200 if account else 404
     
@@ -120,10 +120,10 @@ class AccountInfo(Resource):
         accounts = list(filter(lambda x: x['id'] != account_id, accounts))
         return {'message': 'account deleted'}
 
-class MallInfo(Resource):
-    """Return info from a specific mall."""
+class Mall(Resource):
+    """/mall/{mall id} endpoint."""
     def get(self, mall_id):
-        """/mall/{mall id} endpoint."""
+        """Return a specific mall"""
         mall = next(filter(lambda x: x['id'] == mall_id, malls), None)
         return {'mall': mall}, 200 if mall else 404
     
@@ -152,8 +152,8 @@ api.add_resource(UnitList, '/unit')
 api.add_resource(AddAccount, '/account')
 api.add_resource(AddMall, '/mall/<string:account_id>')
 api.add_resource(AddUnit, '/unit/<string:mall_id>')
-api.add_resource(AccountInfo, '/account/<string:account_id>')
-api.add_resource(MallInfo, '/mall/<string:mall_id>')
+api.add_resource(Account, '/account/<string:account_id>')
+api.add_resource(Mall, '/mall/<string:mall_id>')
 api.add_resource(Unit, '/unit/<string:unit_id>')
 
 if __name__ == '__main__':
