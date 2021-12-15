@@ -113,6 +113,12 @@ class AccountInfo(Resource):
         """/account/{account id} endpoint."""
         account = next(filter(lambda x: x['id'] == account_id, accounts), None)
         return {"account": account}, 200 if account else 404
+    
+    def delete(self, account_id):
+        """Delete a specific account."""
+        global accounts
+        accounts = list(filter(lambda x: x['id'] != account_id, accounts))
+        return {'message': 'account deleted'}
 
 class MallInfo(Resource):
     """Return info from a specific mall."""
@@ -120,6 +126,12 @@ class MallInfo(Resource):
         """/mall/{mall id} endpoint."""
         mall = next(filter(lambda x: x['id'] == mall_id, malls), None)
         return {'mall': mall}, 200 if mall else 404
+    
+    def delete(self, mall_id):
+        """Delete a specific mall."""
+        global malls
+        malls = list(filter(lambda x: x['id'] != mall_id, malls))
+        return {'message': 'mall deleted'}
 
 class Unit(Resource):
     """/unit/{unit id} endpoint."""
@@ -127,6 +139,12 @@ class Unit(Resource):
         """Return a specific unit."""
         unit = next(filter(lambda x: x['id'] == unit_id, units), None)
         return {'unit': unit}, 200 if unit else 404
+    
+    def delete(self, unit_id):
+        """Delete a specific unit."""
+        global units
+        units = list(filter(lambda x: x['id'] != unit_id, units))
+        return {'message': 'unit deleted'}
 
 api.add_resource(AccountList, '/account')
 api.add_resource(MallList, '/mall')
