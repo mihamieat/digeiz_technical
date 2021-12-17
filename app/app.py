@@ -147,6 +147,11 @@ class AddUnit(Resource):
 class Account(Resource):
     """/account/{account id} endpoint."""
 
+    parser = reqparse.RequestParser()
+    parser.add_argument("name", type=str)
+    parser.add_argument("location", type=str)
+    parser.add_argument("capacity", type=int)
+
     def get(self, account_id):
         """Return a specific account."""
         account = next(filter(lambda x: x["id"] == account_id, accounts), None)
@@ -158,9 +163,25 @@ class Account(Resource):
         accounts = list(filter(lambda x: x["id"] != account_id, accounts))
         return {"message": "account deleted"}
 
+    def put(self, account_id):
+        """Modify an specific account."""
+        account = next(filter(lambda x: x["id"] == account_id, accounts), None)
+        if account is None:
+            return {"message": "There is no such account!"}
+
+        data = Account.parser.parse_args()
+        data = {k: v for k, v in data.items() if v is not None}
+        account.update(data)
+        return account, 201
+
 
 class Mall(Resource):
     """/mall/{mall id} endpoint."""
+
+    parser = reqparse.RequestParser()
+    parser.add_argument("name", type=str)
+    parser.add_argument("category", type=str)
+    parser.add_argument("surface", type=float)
 
     def get(self, mall_id):
         """Return a specific mall."""
@@ -173,9 +194,25 @@ class Mall(Resource):
         malls = list(filter(lambda x: x["id"] != mall_id, malls))
         return {"message": "mall deleted"}
 
+    def put(self, mall_id):
+        """Modify an specific mall."""
+        mall = next(filter(lambda x: x["id"] == mall_id, malls), None)
+        if mall is None:
+            return {"message": "There is no such mall!"}
+
+        data = Mall.parser.parse_args()
+        data = {k: v for k, v in data.items() if v is not None}
+        mall.update(data)
+        return mall, 201
+
 
 class Unit(Resource):
     """/unit/{unit id} endpoint."""
+
+    parser = reqparse.RequestParser()
+    parser.add_argument("name", type=str)
+    parser.add_argument("type", type=str)
+    parser.add_argument("price", type=float)
 
     def get(self, unit_id):
         """Return a specific unit."""
@@ -187,6 +224,17 @@ class Unit(Resource):
         global units
         units = list(filter(lambda x: x["id"] != unit_id, units))
         return {"message": "unit deleted"}
+
+    def put(self, unit_id):
+        """Modify an specific unit."""
+        unit = next(filter(lambda x: x["id"] == unit_id, units), None)
+        if unit is None:
+            return {"message": "There is no such unit!"}
+
+        data = Unit.parser.parse_args()
+        data = {k: v for k, v in data.items() if v is not None}
+        unit.update(data)
+        return unit, 201
 
 
 api.add_resource(AccountList, "/account")
