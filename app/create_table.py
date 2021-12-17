@@ -14,7 +14,9 @@ def create_table():
     cursor.execute(create_table)
 
     # mall table
-    create_table = "CREATE TABLE IF NOT EXISTS mall (name text PRIMARY KEY, price real)"
+    create_table = (
+        "CREATE TABLE IF NOT EXISTS mall (id, name  text, account_id, place_number)"
+    )
     cursor.execute(create_table)
 
     # unit table
