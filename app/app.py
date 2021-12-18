@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 """API app."""
-from account import AccountCollection, AccountEdit
-
-from create_table import create_table
+from app.account import AccountCollection, AccountEdit
+from app.create_table import create_table
+from app.mall import AddMall, MallCollection, MallEdit
+from app.unit import AddUnit, UnitCollection, UnitEdit
 
 from flask import Flask
 
 from flask_restful import Api
-
-from mall import AddMall, MallCollection, MallEdit
-
-from unit import AddUnit, UnitCollection, UnitEdit
 
 
 app = Flask(__name__)
