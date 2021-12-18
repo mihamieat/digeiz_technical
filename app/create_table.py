@@ -20,7 +20,7 @@ def create_table():
     cursor.execute(create_table)
 
     # unit table
-    create_table = "CREATE TABLE IF NOT EXISTS unit (name text PRIMARY KEY, price real)"
+    create_table = "CREATE TABLE IF NOT EXISTS unit (id, name  text, mall_id, price)"
     cursor.execute(create_table)
 
     connection.commit()
