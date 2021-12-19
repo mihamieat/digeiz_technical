@@ -78,7 +78,7 @@ class UnitCollection(Resource):
         """Return all units."""
         data = UnitCollection.parser.parse_args()
         page = data["page"]
-        limit = data["limit"] if data['limit'] else self.DEFAULT_LIMIT
+        limit = data["limit"] if data["limit"] else self.DEFAULT_LIMIT
         offset = limit * (page - 1)
 
         connection = sqlite3.connect("data.db")

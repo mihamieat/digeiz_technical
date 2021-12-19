@@ -61,7 +61,7 @@ class AccountCollection(Resource):
         """Return all accounts."""
         data = AccountCollection.parser.parse_args()
         page = data["page"]
-        limit = data["limit"] if data['limit'] else self.DEFAULT_LIMIT
+        limit = data["limit"] if data["limit"] else self.DEFAULT_LIMIT
         offset = limit * (page - 1)
 
         connection = sqlite3.connect("data.db")
@@ -78,7 +78,7 @@ class AccountCollection(Resource):
             page_data["accounts"].append(
                 {"id": row[0], "name": row[1], "location": row[2]}
             )
-        
+
         page_data["count"] = len(page_data["accounts"])
 
         connection.close()

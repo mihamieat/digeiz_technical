@@ -29,7 +29,14 @@ class Mall:
         row = result.fetchone()
         connection.close()
         if row:
-            return {"mall": {"id": row[0], "name": row[1], "account_id": row[2], "place_number": row[3]}}
+            return {
+                "mall": {
+                    "id": row[0],
+                    "name": row[1],
+                    "account_id": row[2],
+                    "place_number": row[3],
+                }
+            }
 
     @classmethod
     def find_by_id(cls, _id):
@@ -43,7 +50,14 @@ class Mall:
         connection.close()
 
         if row:
-            return {"mall": {"id": row[0], "name": row[1], "account_id": row[2], "place_number": row[3]}}
+            return {
+                "mall": {
+                    "id": row[0],
+                    "name": row[1],
+                    "account_id": row[2],
+                    "place_number": row[3],
+                }
+            }
 
     @classmethod
     def find_by_account_id(cls, account_id):
@@ -78,7 +92,7 @@ class MallCollection(Resource):
         """Return all malls."""
         data = MallCollection.parser.parse_args()
         page = data["page"]
-        limit = data["limit"] if data['limit'] else self.DEFAULT_LIMIT
+        limit = data["limit"] if data["limit"] else self.DEFAULT_LIMIT
         offset = limit * (page - 1)
 
         connection = sqlite3.connect("data.db")
@@ -92,7 +106,7 @@ class MallCollection(Resource):
         page_data["malls"] = []
 
         for row in result:
-            page_data['malls'].append(
+            page_data["malls"].append(
                 {
                     "id": row[0],
                     "name": row[1],
@@ -100,7 +114,7 @@ class MallCollection(Resource):
                     "place_number": row[3],
                 }
             )
-        
+
         page_data["count"] = len(page_data["malls"])
 
         connection.close()
