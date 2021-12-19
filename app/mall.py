@@ -29,7 +29,7 @@ class Mall:
         row = result.fetchone()
         connection.close()
         if row:
-            return {"mall": {"id": row[0], "name": row[1], "place_number": row[2]}}
+            return {"mall": {"id": row[0], "name": row[1], "account_id": row[2], "place_number": row[3]}}
 
     @classmethod
     def find_by_id(cls, _id):
@@ -43,7 +43,7 @@ class Mall:
         connection.close()
 
         if row:
-            return {"mall": {"id": row[0], "name": row[1], "place_number": row[2]}}
+            return {"mall": {"id": row[0], "name": row[1], "account_id": row[2], "place_number": row[3]}}
 
     @classmethod
     def find_by_account_id(cls, account_id):
