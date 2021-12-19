@@ -49,6 +49,46 @@ class AccountCollection(Resource):
     """/account endpoint."""
 
     TABLE_NAME = "account"
+    DEFAULT_LIMIT = 10
+
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        "page", type=int, required=True, help="This field cannot be left blank!"
+    )
+    parser.add_argument("limit", type=int)
+
+    def get(self):
+        """Return all accounts."""
+        data = AccountCollection.parser.parse_args()
+        page = data["page"]
+        limit = data["limit"] if data['limit'] else self.DEFAULT_LIMIT
+        offset = limit * (page - 1)
+
+        connection = sqlite3.connect("data.db")
+        cursor = connection.cursor()
+        query = "SELECT * FROM {table} LIMIT ? OFFSET ?".format(table=self.TABLE_NAME)
+        result = cursor.execute(query, (limit, offset))
+
+        page_data = {}
+        page_data["page_number"] = page
+        page_data["limit"] = limit
+        page_data["accounts"] = []
+
+        for row in result:
+            page_data["accounts"].append(
+                {"id": row[0], "name": row[1], "location": row[2]}
+            )
+        
+        page_data["count"] = len(page_data["accounts"])
+
+        connection.close()
+        return {"accounts": page_data}
+
+
+class AddAccount(Resource):
+    """/account endpoint."""
+
+    TABLE_NAME = "account"
 
     parser = reqparse.RequestParser()
     parser.add_argument(
@@ -58,23 +98,9 @@ class AccountCollection(Resource):
         "location", type=str, required=True, help="This field cannot be left blank!"
     )
 
-    def get(self):
-        """Return all accounts."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM {table}".format(table=self.TABLE_NAME)
-        result = cursor.execute(query)
-        accounts = []
-        for row in result:
-            accounts.append({"id": row[0], "name": row[1], "location": row[2]})
-        connection.close()
-
-        return {"accounts": accounts}
-
     def post(self):
         """Create an account if not existing."""
-        data = AccountCollection.parser.parse_args()
+        data = AddAccount.parser.parse_args()
         if Account.find_by_name(data["name"]):
             return {"message": "Account with that username already exists."}, 400
 

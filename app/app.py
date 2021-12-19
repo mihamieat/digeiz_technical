@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """API app."""
-from app.account import AccountCollection, AccountEdit
+from app.account import AccountCollection, AccountEdit, AddAccount
 from app.create_table import create_table
 from app.mall import AddMall, MallCollection, MallEdit
 from app.unit import AddUnit, UnitCollection, UnitEdit
@@ -16,6 +16,7 @@ api = Api(app)
 
 
 api.add_resource(AccountCollection, "/account")
+api.add_resource(AddAccount, "/account")
 api.add_resource(AccountEdit, "/account/<string:account_id>")
 
 api.add_resource(MallCollection, "/mall")

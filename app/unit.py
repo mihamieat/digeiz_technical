@@ -66,23 +66,39 @@ class UnitCollection(Resource):
     """/unit endpoint."""
 
     TABLE_NAME = "unit"
+    DEFAULT_LIMIT = 10
+
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        "page", type=int, required=True, help="This field cannot be left blank!"
+    )
+    parser.add_argument("limit", type=int)
 
     def get(self):
         """Return all units."""
+        data = UnitCollection.parser.parse_args()
+        page = data["page"]
+        limit = data["limit"] if data['limit'] else self.DEFAULT_LIMIT
+        offset = limit * (page - 1)
+
         connection = sqlite3.connect("data.db")
         cursor = connection.cursor()
+        query = "SELECT * FROM {table} LIMIT ? OFFSET ?".format(table=self.TABLE_NAME)
+        result = cursor.execute(query, (limit, offset))
 
-        query = "SELECT * FROM {table}".format(table=self.TABLE_NAME)
-        result = cursor.execute(query)
-
-        units = []
+        page_data = {}
+        page_data["page_number"] = page
+        page_data["limit"] = limit
+        page_data["units"] = []
         for row in result:
-            units.append(
+            page_data["units"].append(
                 {"id": row[0], "name": row[1], "mall_id": row[2], "price": row[3]}
             )
 
+        page_data["count"] = len(page_data["units"])
+
         connection.close()
-        return {"units": units}
+        return {"units": page_data}
 
 
 class AddUnit(Resource):

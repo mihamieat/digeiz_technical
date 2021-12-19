@@ -66,18 +66,33 @@ class MallCollection(Resource):
     """/mall endpoint."""
 
     TABLE_NAME = "mall"
+    DEFAULT_LIMIT = 10
+
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        "page", type=int, required=True, help="This field cannot be left blank!"
+    )
+    parser.add_argument("limit", type=int)
 
     def get(self):
         """Return all malls."""
+        data = MallCollection.parser.parse_args()
+        page = data["page"]
+        limit = data["limit"] if data['limit'] else self.DEFAULT_LIMIT
+        offset = limit * (page - 1)
+
         connection = sqlite3.connect("data.db")
         cursor = connection.cursor()
+        query = "SELECT * FROM {table} LIMIT ? OFFSET ?".format(table=self.TABLE_NAME)
+        result = cursor.execute(query, (limit, offset))
 
-        query = "SELECT * FROM {table}".format(table=self.TABLE_NAME)
-        result = cursor.execute(query)
+        page_data = {}
+        page_data["page_number"] = page
+        page_data["limit"] = limit
+        page_data["malls"] = []
 
-        malls = []
         for row in result:
-            malls.append(
+            page_data['malls'].append(
                 {
                     "id": row[0],
                     "name": row[1],
@@ -85,9 +100,11 @@ class MallCollection(Resource):
                     "place_number": row[3],
                 }
             )
+        
+        page_data["count"] = len(page_data["malls"])
 
         connection.close()
-        return {"malls": malls}
+        return {"malls": page_data}
 
 
 class AddMall(Resource):
