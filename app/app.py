@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """API app."""
-from app.account import AccountCollection, AccountEdit, AddAccount
+from app.resources.account import AccountCollection, AccountEdit, AddAccount
 from app.create_table import create_table
-from app.mall import AddMall, MallCollection, MallEdit
-from app.unit import AddUnit, UnitCollection, UnitEdit
+from app.resources.mall import AddMall, MallCollection, MallEdit
+from app.resources.unit import AddUnit, UnitCollection, UnitEdit
 
 from flask import Flask
 
@@ -29,5 +29,5 @@ api.add_resource(UnitEdit, "/unit/<string:unit_id>")
 
 create_table()
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     app.run(port=5000, debug=True)
