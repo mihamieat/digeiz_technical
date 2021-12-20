@@ -27,6 +27,7 @@ api.add_resource(UnitCollection, "/unit")
 api.add_resource(AddUnit, "/unit/<string:mall_id>")
 api.add_resource(UnitEdit, "/unit/<string:unit_id>")
 
-if __name__ == "__main__":
-    create_table()
+create_table()
+
+if __name__ == "__main__": 
     app.run(port=5000, debug=True)
