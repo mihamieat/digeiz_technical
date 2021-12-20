@@ -1,0 +1,42 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.3.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: fix-encoding-pragma
+      - id: trailing-whitespace
+  - repo: https://github.com/ambv/black
+    rev: 20.8b1
+    hooks:
+      - id: black
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.4
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-blind-except, flake8-bugbear,flake8-builtins,flake8-docstrings,flake8-import-order,flake8-logging-format,pep8-naming,flake8-rst-docstrings]
+  - repo: https://github.com/IamTheFij/docker-pre-commit
+    rev: v2.0.0
+    hooks:
+      - id: docker-compose-check
+      - id: hadolint-system
+  - repo: local
+    hooks:
+      - id: pylint-errors
+        name: Check pylint errors
+        entry: pylint -E
+        language: system
+        files: ^src/
+        types: [file, python]
+        require_serial: true
+      - id: poetry-check
+        name: Validate pyproject.toml
+        entry: poetry check
+        language: system
+        types: [file]
+        files: "^pyproject.toml$"
+        pass_filenames: false
