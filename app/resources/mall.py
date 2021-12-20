@@ -8,9 +8,6 @@ from app.models.mall import Mall
 from flask_restful import Resource, reqparse
 
 
-
-
-
 class MallCollection(Resource):
     """/mall endpoint."""
 

@@ -13,7 +13,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="digeiz_test",
-    version="0.1",
+    version="0.1.0",
     author="Mihamina Rakotovazaha",
     description="DiGeiz technical test delivery pakage.",
     long_description=long_description,

@@ -2,6 +2,7 @@
 """Unit model."""
 import sqlite3
 
+
 class Unit:
     """Search a unit in the database."""
 
