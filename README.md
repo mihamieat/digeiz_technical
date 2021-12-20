@@ -68,7 +68,7 @@ Date: Sat, 18 Dec 2021 17:33:01 GMT
 ```
 ##### Request
 ```
-curl -i -H 'Accept: application/json' -X POST  -H 'Content-Type: application/json' -d '{"nale": "new_store", "location": "Nantes"}' http://127.0.0.1:5000/account
+curl -i -H 'Accept: application/json' -X POST  -H 'Content-Type: application/json' -d '{"name": "new_store", "location": "Nantes"}' http://127.0.0.1:5000/account
 ```
 ##### Response
 ```
@@ -119,7 +119,7 @@ Date: Sun, 19 Dec 2021 21:38:37 GMT
 ```
 ##### Request
 ```
-curl -H 'Accept: application/json' -H 'Content-Type: application/json' -X PUT  -d '{"nam": "new_name", "location": "Tours}' http://127.0.0.1:5000/account/badc692c-602a-11ec-9755-acde48001122
+curl -H 'Accept: application/json' -H 'Content-Type: application/json' -X PUT  -d '{"name": "new_name", "location": "Tours}' http://127.0.0.1:5000/account/badc692c-602a-11ec-9755-acde48001122
 ```
 ##### Response
 ```
@@ -282,7 +282,7 @@ Date: Sun, 19 Dec 2021 21:21:00 GMT
     "mall": {
         "id": "946552aa-610a-11ec-bab0-acde48001122",
         "name": "shoppingmall",
-        "account_id": "906c0d88-603d-11ec-99b7-acde48001122",
+        "account_id": "906c0e88-603d-11ec-99b7-acde48001122",
         "place_number": 1
     }
 }
