@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Account model."""
+"""Mall model."""
 import sqlite3
 
 class Mall:
