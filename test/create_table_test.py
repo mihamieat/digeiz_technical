@@ -6,22 +6,20 @@ import sqlite3
 
 def create_table_test():
     """Create a SQL table for account mall and unit."""
-    connection = sqlite3.connect("test.db")
+    connection = sqlite3.connect("data.db")
     cursor = connection.cursor()
 
     # account table
-    create_table = "CREATE TABLE IF NOT EXISTS account (id, name  text, location text)"
-    cursor.execute(create_table)
+    insert_values = "INSERT INTO account VALUES (12345, 'account1', 'Lilles')"
+    cursor.execute(insert_values)
 
     # mall table
-    create_table = (
-        "CREATE TABLE IF NOT EXISTS mall (id, name  text, account_id, place_number)"
-    )
-    cursor.execute(create_table)
+    insert_values = "INSERT INTO mall VALUES (6789, 'mall1', 12345, 1)"
+    cursor.execute(insert_values)
 
     # unit table
-    create_table = "CREATE TABLE IF NOT EXISTS unit (id, name  text, mall_id, price)"
-    cursor.execute(create_table)
+    insert_values = "INSERT INTO unit VALUES (10111213, 'unit1', 6789, 100)"
+    cursor.execute(insert_values)
 
     connection.commit()
 
