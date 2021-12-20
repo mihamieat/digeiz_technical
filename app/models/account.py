@@ -2,6 +2,7 @@
 """Account model."""
 import sqlite3
 
+
 class Account:
     """Search an account in the database."""
 

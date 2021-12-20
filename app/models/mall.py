@@ -2,6 +2,7 @@
 """Mall model."""
 import sqlite3
 
+
 class Mall:
     """Search a mall in the database."""
 
