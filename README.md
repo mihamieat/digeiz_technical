@@ -12,6 +12,7 @@ flask run
 ```
 ### Run the test
 ```
+tox
 ```
 ## Rest API
 ### Account

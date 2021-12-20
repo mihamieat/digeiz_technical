@@ -15,9 +15,9 @@ class Account:
         self.location = location
 
     @classmethod
-    def find_by_name(cls, name):
+    def find_by_name(cls, name, database="data.db"):
         """Find an account in table by its name."""
-        connection = sqlite3.connect("data.db")
+        connection = sqlite3.connect(database)
         cursor = connection.cursor()
 
         query = "SELECT * FROM {table} WHERE name=?".format(table=cls.TABLE_NAME)
@@ -28,9 +28,9 @@ class Account:
             return {"account": {"id": row[0], "name": row[1], "location": row[2]}}
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id, database="data.db"):
         """Find an account in table by its id."""
-        connection = sqlite3.connect("data.db")
+        connection = sqlite3.connect(database)
         cursor = connection.cursor()
 
         query = "SELECT * FROM {table} WHERE id=?".format(table=cls.TABLE_NAME)
