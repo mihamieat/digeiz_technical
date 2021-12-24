@@ -25,4 +25,5 @@ def create_table_test():
 
     connection.close()
 
+
 create_table_test()
