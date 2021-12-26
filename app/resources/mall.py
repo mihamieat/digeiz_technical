@@ -76,6 +76,36 @@ class AddMall(Resource):
 
         return {"message": "Mall created successfully."}, 201
 
+class MallBulk(Resource):
+    """/mall/bulk/{account uuid} endpoint."""
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        "name", type=str, required=True, help="name' field cannot be left blank!", action="append"
+    )
+    parser.add_argument(
+        "place_number",
+        type=int,
+        required=True,
+        help="'Place number' field cannot be left blank!",
+        action="append"
+    )
+    def post(self, account_uuid):
+        """Post bulk mall list."""
+        data = self.parser.parse_args()
+        name_list = data["name"]
+        place_list = data["place_number"]
+
+        mall_object_list = []
+
+        for i in range(0, len(name_list)):
+            mall_uuid = str(uuid.uuid1())
+            mall = MallModel(name_list[i], place_list[i], mall_uuid, account_uuid)
+            mall_object_list.append(mall)
+        
+        MallModel.bulk_insert(mall_object_list)
+
+        return 200
+
 
 class Mall(Resource):
     """/mall/{mall id} endpoint."""

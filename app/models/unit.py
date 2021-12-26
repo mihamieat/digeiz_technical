@@ -56,3 +56,8 @@ class UnitModel(db.Model):
         """Delete a unit from the database."""
         db.session.delete(self)
         db.session.commit()
+    
+    def bulk_insert(unit_obj_list):
+        """Bulk inster unit object list."""
+        db.session.bulk_save_objects(unit_obj_list)
+        db.session.commit()

@@ -47,3 +47,8 @@ class AccountModel(db.Model):
         """Delete account from the database."""
         db.session.delete(self)
         db.session.commit()
+
+    def bulk_insert(account_obj_list):
+        """Bulk inster account object list."""
+        db.session.bulk_save_objects(account_obj_list)
+        db.session.commit()
