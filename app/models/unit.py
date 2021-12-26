@@ -1,59 +1,63 @@
 # -*- coding: utf-8 -*-
 """Unit model."""
-import sqlite3
+from app.db import db
 
 
-class Unit:
-    """Search a unit in the database."""
+class UnitModel(db.Model):
+    """Unit model."""
 
-    TABLE_NAME = "unit"
+    __tablename__ = "unit"
 
-    def __init__(self, name, _id, mall_id, price):
-        """Init Acount with name and location."""
+    unit_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    price = db.Column(db.Float(precision=2))
+    uuid = db.Column(db.String)
+
+    mall_uuid = db.Column(db.String, db.ForeignKey("mall.uuid"))
+    mall = db.relationship("MallModel")
+
+    def __init__(self, name, price, uuid, mall_uuid):
+        """Init unit with name, place number and mall uuid."""
         self.name = name
-        self._id = _id
-        self.mall_id = mall_id
         self.price = price
+        self.uuid = uuid
+        self.mall_uuid = mall_uuid
+
+    def json(self):
+        """Return unit json."""
+        return {
+            "name": self.name,
+            "price": self.price,
+            "uuid": self.uuid,
+            "mall_uuid": self.mall_uuid,
+        }
+
+    @classmethod
+    def get_all(cls):
+        """Return all units."""
+        return cls.query.all()
 
     @classmethod
     def find_by_name(cls, name):
         """Find a unit in table by its name."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM {table} WHERE name=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (name,))
-        row = result.fetchone()
-        connection.close()
-        if row:
-            return {"unit": {"id": row[0], "name": row[1], "price": row[2]}}
+        return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_uuid(cls, uuid):
         """Find a unit in table by its id."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
+        return cls.query.filter_by(uuid=uuid).first()
 
-        query = "SELECT * FROM {table} WHERE id=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (_id,))
-        row = result.fetchone()
-        connection.close()
+    def save_to_db(self):
+        """Save units properties to the database."""
+        db.session.add(self)
+        db.session.commit()
 
-        if row:
-            return {"account": {"id": row[0], "name": row[1], "price": row[2]}}
+    def delete_from_db(self):
+        """Delete a unit from the database."""
+        db.session.delete(self)
+        db.session.commit()
 
-    @classmethod
-    def find_by_mall_id(cls, mall_id):
-        """Find all unit of a mall."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM {table} WHERE mall_id=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (mall_id,))
-
-        units = []
-        for row in result:
-            units.append({"id": row[0], "name": row[1], "mall_id": row[2]})
-
-        connection.close()
-        return {"units": units}
+    def bulk_insert(unit_obj_list):
+        """Bulk inster unit object list."""
+        db.session.bulk_save_objects(unit_obj_list)
+        db.session.commit()

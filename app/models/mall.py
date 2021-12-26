@@ -1,73 +1,68 @@
 # -*- coding: utf-8 -*-
 """Mall model."""
-import sqlite3
+from app.db import db
 
 
-class Mall:
-    """Search a mall in the database."""
+class MallModel(db.Model):
+    """Mall model."""
 
-    TABLE_NAME = "mall"
+    __tablename__ = "mall"
 
-    def __init__(self, name, _id, account_id, place_number):
-        """Init mall with name and location."""
+    mall_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    place_number = db.Column(db.String)
+    uuid = db.Column(db.String)
+
+    account_uuid = db.Column(db.String, db.ForeignKey("account.uuid"))
+    account = db.relationship("AccountModel")
+
+    def __init__(self, name, place_number, uuid, account_uuid):
+        """Init mall with name, place number and account uuid."""
         self.name = name
-        self._id = _id
-        self.account_id = account_id
         self.place_number = place_number
+        self.uuid = uuid
+        self.account_uuid = account_uuid
+
+    def json(self):
+        """Return mall json."""
+        return {
+            "name": self.name,
+            "place_number": self.place_number,
+            "uuid": self.uuid,
+            "account_uuid": self.account_uuid,
+        }
+
+    @classmethod
+    def get_all(cls):
+        """Return all malls."""
+        return cls.query.all()
 
     @classmethod
     def find_by_name(cls, name):
-        """Find an mall in table by its name."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM {table} WHERE name=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (name,))
-        row = result.fetchone()
-        connection.close()
-        if row:
-            return {
-                "mall": {
-                    "id": row[0],
-                    "name": row[1],
-                    "account_id": row[2],
-                    "place_number": row[3],
-                }
-            }
+        """Find a mall in table by its name."""
+        return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_uuid(cls, uuid):
         """Find a mall in table by its id."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM {table} WHERE id=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (_id,))
-        row = result.fetchone()
-        connection.close()
-
-        if row:
-            return {
-                "mall": {
-                    "id": row[0],
-                    "name": row[1],
-                    "account_id": row[2],
-                    "place_number": row[3],
-                }
-            }
+        return cls.query.filter_by(uuid=uuid).first()
 
     @classmethod
-    def find_by_account_id(cls, account_id):
-        """Find all mall of an account."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
+    def find_by_place_number(cls, place_number):
+        """Find a mall in the table by its place numbver."""
+        return cls.query.filter_by(place_number=place_number).first()
 
-        query = "SELECT * FROM {table} WHERE account_id=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (account_id,))
+    def save_to_db(self):
+        """Save malls properties to the database."""
+        db.session.add(self)
+        db.session.commit()
 
-        malls = []
-        for row in result:
-            malls.append({"id": row[0], "name": row[1], "account_id": row[2]})
+    def delete_from_db(self):
+        """Delete a mall from the database."""
+        db.session.delete(self)
+        db.session.commit()
 
-        connection.close()
-        return {"malls": malls}
+    def bulk_insert(mall_obj_list):
+        """Bulk inster mall oject list."""
+        db.session.bulk_save_objects(mall_obj_list)
+        db.session.commit()

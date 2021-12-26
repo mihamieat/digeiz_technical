@@ -1,42 +1,54 @@
 # -*- coding: utf-8 -*-
 """Account model."""
-import sqlite3
+from app.db import db
 
 
-class Account:
-    """Search an account in the database."""
+class AccountModel(db.Model):
+    """Account model."""
 
-    TABLE_NAME = "account"
+    __tablename__ = "account"
 
-    def __init__(self, name, _id, location):
+    acc_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    location = db.Column(db.String)
+    uuid = db.Column(db.String)
+
+    def __init__(self, name, location, uuid):
         """Init Acount with name, id and location."""
         self.name = name
-        self._id = _id
         self.location = location
+        self.uuid = uuid
+
+    def json(self):
+        """Return account json."""
+        return {"name": self.name, "location": self.location, "uuid": self.uuid}
 
     @classmethod
-    def find_by_name(cls, name, database="data.db"):
+    def get_all(cls):
+        """Return all accounts."""
+        return cls.query.all()
+
+    @classmethod
+    def find_by_name(cls, name):
         """Find an account in table by its name."""
-        connection = sqlite3.connect(database)
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM {table} WHERE name=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (name,))
-        row = result.fetchone()
-        connection.close()
-        if row:
-            return {"account": {"id": row[0], "name": row[1], "location": row[2]}}
+        return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def find_by_id(cls, _id, database="data.db"):
+    def find_by_uuid(cls, uuid):
         """Find an account in table by its id."""
-        connection = sqlite3.connect(database)
-        cursor = connection.cursor()
+        return cls.query.filter_by(uuid=uuid).first()
 
-        query = "SELECT * FROM {table} WHERE id=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (_id,))
-        row = result.fetchone()
-        connection.close()
+    def save_to_db(self):
+        """Save account properties to the database."""
+        db.session.add(self)
+        db.session.commit()
 
-        if row:
-            return {"account": {"id": row[0], "name": row[1], "location": row[2]}}
+    def delete_from_db(self):
+        """Delete account from the database."""
+        db.session.delete(self)
+        db.session.commit()
+
+    def bulk_insert(account_obj_list):
+        """Bulk inster account object list."""
+        db.session.bulk_save_objects(account_obj_list)
+        db.session.commit()

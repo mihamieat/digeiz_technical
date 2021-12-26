@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-"""unit API."""
-import sqlite3
+"""Unit API."""
 import uuid
 
-from app.models.unit import Unit
-
 from flask_restful import Resource, reqparse
+
+from app.models.mall import MallModel
+from app.models.unit import UnitModel
 
 
 class UnitCollection(Resource):
     """/unit endpoint."""
 
-    TABLE_NAME = "unit"
     DEFAULT_LIMIT = 10
 
     parser = reqparse.RequestParser()
@@ -21,113 +20,116 @@ class UnitCollection(Resource):
     parser.add_argument("limit", type=int)
 
     def get(self):
-        """Return all units."""
+        """Return all munitsalls collection."""
         data = UnitCollection.parser.parse_args()
         page = data["page"]
         limit = data["limit"] if data["limit"] else self.DEFAULT_LIMIT
-        offset = limit * (page - 1)
 
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-        query = "SELECT * FROM {table} LIMIT ? OFFSET ?".format(table=self.TABLE_NAME)
-        result = cursor.execute(query, (limit, offset))
+        units = list(map(lambda x: x.json(), UnitModel.get_all()))
 
-        page_data = {}
-        page_data["page_number"] = page
-        page_data["limit"] = limit
-        page_data["units"] = []
-        for row in result:
-            page_data["units"].append(
-                {"id": row[0], "name": row[1], "mall_id": row[2], "price": row[3]}
-            )
+        list_of_unit_list = [units[i:i + limit] for i in range(0, len(units), limit)]
 
-        page_data["count"] = len(page_data["units"])
-
-        connection.close()
-        return {"units": page_data}
+        try:
+            unit_page = list_of_unit_list[page - 1]
+        except IndexError:
+            return {"message": "Page out of range!"}, 400
+        return {
+            "page": page,
+            "limit": limit,
+            "total": len(unit_page),
+            "units": unit_page,
+        }
 
 
 class AddUnit(Resource):
-    """/unit/{account id} endpoint."""
-
-    TABLE_NAME = "unit"
+    """/unit/{mall uuid} endpoint."""
 
     parser = reqparse.RequestParser()
     parser.add_argument(
-        "name", type=str, required=True, help="This field cannot be left blank!"
+        "name", type=str, required=True, help="Name field cannot be left blank!"
     )
     parser.add_argument(
-        "price", type=int, required=True, help="This field cannot be left blank!"
+        "price", type=int, required=True, help="Price field cannot be left blank!"
     )
 
-    def post(self, mall_id):
-        """Create a new unit for a given account."""
+    def post(self, mall_uuid):
+        """Create a new unit for a given mall."""
         data = AddUnit.parser.parse_args()
-        if Unit.find_by_name(data["name"]) and Unit.find_by_mall_id(mall_id):
-            return {"message": "Unit with that name in this mall already exists"}, 400
+        if UnitModel.find_by_name(data["name"]) and MallModel.find_by_uuid(mall_uuid):
+            return {"message": "Unit with that name in this mall already exists."}, 400
 
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
+        unit_uuid = str(uuid.uuid1())
 
-        query = "INSERT INTO {table} VALUES (?, ?, ?, ?)".format(table=self.TABLE_NAME)
-        unit_id = str(uuid.uuid1())
-        cursor.execute(query, (unit_id, data["name"], mall_id, data["price"]))
+        unit = UnitModel(data["name"], data["price"], unit_uuid, mall_uuid)
+        unit.save_to_db()
 
-        connection.commit()
-        connection.close()
-
-        return {
-            "unit": {
-                "id": unit_id,
-                "name": data["name"],
-                "mall_id": mall_id,
-                "price": data["price"],
-            }
-        }, 201
+        return {"message": "Unit created successfully."}, 201
 
 
-class UnitEdit(Resource):
+class UnitBulk(Resource):
+    """/unit/bulk/{mall uuid} endpoint."""
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        "name", type=str, required=True, help="name' field cannot be left blank!", action="append"
+    )
+    parser.add_argument(
+        "price",
+        type=float,
+        required=True,
+        help="'Price' field cannot be left blank!",
+        action="append"
+    )
+
+    def post(self, mall_uuid):
+        """Post bulk unit list."""
+        data = self.parser.parse_args()
+        name_list = data["name"]
+        price_list = data["price"]
+
+        unit_object_list = []
+
+        for i in range(0, len(name_list)):
+            unit_uuid = str(uuid.uuid1())
+            unit = UnitModel(name_list[i], price_list[i], unit_uuid, mall_uuid)
+            unit_object_list.append(unit)
+
+        UnitModel.bulk_insert(unit_object_list)
+
+        return 200
+
+
+class Unit(Resource):
     """/unit/{unit id} endpoint."""
-
-    TABLE_NAME = "unit"
 
     parser = reqparse.RequestParser()
     parser.add_argument("name", type=str)
-    parser.add_argument("price", type=int)
+    parser.add_argument("price", type=str)
 
-    def get(self, unit_id):
+    def get(self, unit_uuid):
         """Return a specific unit."""
-        unit = Unit.find_by_id(unit_id)
+        unit = UnitModel.find_by_uuid(unit_uuid)
         if unit:
-            return unit
-        return {"message": "Unit not found!"}, 404
+            return unit.json()
+        return {"message": "Unit not found"}, 404
 
-    def delete(self, unit_id):
-        """Delete a specific mal."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
+    def delete(self, unit_uuid):
+        """Delete a specific unit."""
+        unit = UnitModel.find_by_uuid(unit_uuid)
+        if unit:
+            unit.delete_from_db()
+            return {"message": "Unit deleted."}
+        return {"message": "Unit not found."}, 404
 
-        query = "DELETE FROM {table} WHERE id=?".format(table=self.TABLE_NAME)
-        cursor.execute(query, (unit_id,))
+    def put(self, unit_uuid):
+        """Modify an specific mall."""
+        data = Unit.parser.parse_args()
+        unit = UnitModel.find_by_uuid(unit_uuid)
+        if unit:
+            if data["name"]:
+                unit.name = data["name"]
+            if data["price"]:
+                unit.place_number = data["price"]
 
-        connection.commit()
-        connection.close()
-
-        return {"message": "Unit deleted."}
-
-    def put(self, unit_id):
-        """Modify an specific account."""
-        data = UnitEdit.parser.parse_args()
-        update_unit = {"name": data["name"], "price": data["price"]}
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-
-        query = "UPDATE {table} SET name=ifnull(?, name), price=ifnull(?, price) WHERE id=?".format(
-            table=self.TABLE_NAME
-        )
-        cursor.execute(query, (update_unit["name"], update_unit["price"], unit_id))
-
-        connection.commit()
-        connection.close()
-
-        return 201
+            unit.save_to_db()
+            return {"unit": unit.json()}, 201
+        return {"message": "Unit not found"}, 404
