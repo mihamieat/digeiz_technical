@@ -67,6 +67,7 @@ class AddAccount(Resource):
 
         return {"message": "Account created successfully."}, 201
 
+
 class AccountBulk(Resource):
     """/account/bulk endpoint."""
     parser = reqparse.RequestParser()
@@ -80,6 +81,7 @@ class AccountBulk(Resource):
         help="'Location' field cannot be left blank!",
         action="append"
     )
+
     def post(self):
         """Post bulk account list."""
         data = self.parser.parse_args()
@@ -92,10 +94,11 @@ class AccountBulk(Resource):
             acc_uuid = str(uuid.uuid1())
             account = AccountModel(name_list[i], location_list[i], acc_uuid)
             account_object_list.append(account)
-        
+
         AccountModel.bulk_insert(account_object_list)
 
         return 200
+
 
 class Account(Resource):
     """/account/{account id} endpoint."""

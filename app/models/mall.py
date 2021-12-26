@@ -61,7 +61,7 @@ class MallModel(db.Model):
         """Delete a mall from the database."""
         db.session.delete(self)
         db.session.commit()
-    
+
     def bulk_insert(mall_obj_list):
         """Bulk inster mall oject list."""
         db.session.bulk_save_objects(mall_obj_list)

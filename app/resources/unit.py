@@ -65,6 +65,7 @@ class AddUnit(Resource):
 
         return {"message": "Unit created successfully."}, 201
 
+
 class UnitBulk(Resource):
     """/unit/bulk/{mall uuid} endpoint."""
     parser = reqparse.RequestParser()
@@ -78,6 +79,7 @@ class UnitBulk(Resource):
         help="'Price' field cannot be left blank!",
         action="append"
     )
+
     def post(self, mall_uuid):
         """Post bulk unit list."""
         data = self.parser.parse_args()
@@ -90,10 +92,11 @@ class UnitBulk(Resource):
             unit_uuid = str(uuid.uuid1())
             unit = UnitModel(name_list[i], price_list[i], unit_uuid, mall_uuid)
             unit_object_list.append(unit)
-        
+
         UnitModel.bulk_insert(unit_object_list)
 
         return 200
+
 
 class Unit(Resource):
     """/unit/{unit id} endpoint."""
