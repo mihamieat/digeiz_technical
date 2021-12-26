@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 """Account API."""
-import sqlite3
 import uuid
 
-from app.models.account import Account
-
 from flask_restful import Resource, reqparse
+
+from app.models.account import AccountModel
 
 
 class AccountCollection(Resource):
     """/account endpoint."""
 
-    TABLE_NAME = "account"
     DEFAULT_LIMIT = 10
 
     parser = reqparse.RequestParser()
@@ -21,115 +19,87 @@ class AccountCollection(Resource):
     parser.add_argument("limit", type=int)
 
     def get(self):
-        """Return all accounts."""
+        """Return all accounts collection."""
         data = AccountCollection.parser.parse_args()
         page = data["page"]
         limit = data["limit"] if data["limit"] else self.DEFAULT_LIMIT
-        offset = limit * (page - 1)
-
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
-        query = "SELECT * FROM {table} LIMIT ? OFFSET ?".format(table=self.TABLE_NAME)
-        result = cursor.execute(query, (limit, offset))
-
-        page_data = {}
-        page_data["page_number"] = page
-        page_data["limit"] = limit
-        page_data["accounts"] = []
-
-        for row in result:
-            page_data["accounts"].append(
-                {"id": row[0], "name": row[1], "location": row[2]}
-            )
-
-        page_data["count"] = len(page_data["accounts"])
-
-        connection.close()
-        return {"accounts": page_data}
+        accounts = list(map(lambda x: x.json(), AccountModel.get_all()))
+        list_of_acc_list = [
+            accounts[i:i + limit] for i in range(0, len(accounts), limit)
+        ]
+        try:
+            accounts_page = list_of_acc_list[page - 1]
+        except IndexError:
+            return {"message": "Page out of range!"}, 400
+        return {
+            "page": page,
+            "limit": limit,
+            "total": len(accounts_page),
+            "accounts": accounts_page,
+        }
 
 
 class AddAccount(Resource):
     """/account endpoint."""
 
-    TABLE_NAME = "account"
-
     parser = reqparse.RequestParser()
     parser.add_argument(
-        "name", type=str, required=True, help="This field cannot be left blank!"
+        "name", type=str, required=True, help="'Name' field cannot be left blank!"
     )
     parser.add_argument(
-        "location", type=str, required=True, help="This field cannot be left blank!"
+        "location",
+        type=str,
+        required=True,
+        help="'Location' field cannot be left blank!",
     )
 
     def post(self):
         """Create an account if not existing."""
         data = AddAccount.parser.parse_args()
-        if Account.find_by_name(data["name"]):
-            return {"message": "Account with that username already exists."}, 400
 
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
+        if AccountModel.find_by_name(data["name"]):
+            return {"message": "An account with this name already exists."}, 400
 
-        query = "INSERT INTO {table} VALUES (?, ?, ?)".format(table=self.TABLE_NAME)
-        account_id = str(uuid.uuid1())
-        cursor.execute(query, (account_id, data["name"], data["location"]))
+        acc_uuid = str(uuid.uuid1())
 
-        connection.commit()
-        connection.close()
+        account = AccountModel(data["name"], data["location"], acc_uuid)
+        account.save_to_db()
 
-        return {
-            "account": {
-                "id": account_id,
-                "name": data["name"],
-                "location": data["location"],
-            }
-        }, 201
+        return {"message": "Account created successfully."}, 201
 
 
-class AccountEdit(Resource):
+class Account(Resource):
     """/account/{account id} endpoint."""
-
-    TABLE_NAME = "account"
 
     parser = reqparse.RequestParser()
     parser.add_argument("name", type=str)
     parser.add_argument("location", type=str)
 
-    def get(self, account_id):
+    def get(self, account_uuid):
         """Return a specific account."""
-        account = Account.find_by_id(account_id)
+        account = AccountModel.find_by_uuid(account_uuid)
         if account:
-            return account
-        return {"message": "account not found!"}, 404
+            return account.json()
+        return {"message": "Account not found"}, 404
 
-    def delete(self, account_id):
+    def delete(self, account_uuid):
         """Delete a specific account."""
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
+        account = AccountModel.find_by_uuid(account_uuid)
+        if account:
+            account.delete_from_db()
+            return {"message": "Account deleted."}
+        return {"message": "Account not found."}, 404
 
-        query = "DELETE FROM {table} WHERE id=?".format(table=self.TABLE_NAME)
-        cursor.execute(query, (account_id,))
-
-        connection.commit()
-        connection.close()
-
-        return {"message": "Account deleted."}
-
-    def put(self, account_id):
+    def put(self, account_uuid):
         """Modify an specific account."""
-        data = AccountEdit.parser.parse_args()
-        update_account = {"name": data["name"], "location": data["location"]}
-        connection = sqlite3.connect("data.db")
-        cursor = connection.cursor()
+        data = Account.parser.parse_args()
+        account = AccountModel.find_by_uuid(account_uuid)
+        if account:
+            if data["name"]:
+                account.name = data["name"]
+            if data["location"]:
+                account.location = data["location"]
 
-        query = "UPDATE {table} SET name=ifnull(?, name), location=ifnull(?, location) WHERE id=?".format(
-            table=self.TABLE_NAME
-        )
-        cursor.execute(
-            query, (update_account["name"], update_account["location"], account_id)
-        )
-
-        connection.commit()
-        connection.close()
-
-        return 201
+            account.save_to_db()
+            return {"account": account.json()}
+        return {"message": "Account not found"}, 404

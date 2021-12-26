@@ -1,34 +1,43 @@
 # -*- coding: utf-8 -*-
 """API app."""
-from app.create_table import create_table
-from app.resources.account import AccountCollection, AccountEdit, AddAccount
-from app.resources.mall import AddMall, MallCollection, MallEdit
-from app.resources.unit import AddUnit, UnitCollection, UnitEdit
-
 from flask import Flask
 
 from flask_restful import Api
 
+from app.resources.account import Account, AccountCollection, AddAccount
+from app.resources.mall import AddMall, Mall, MallCollection
+from app.resources.unit import AddUnit, Unit, UnitCollection
+
 
 def create_app():
     """Create the Flask appliction."""
+    from app.db import db
+
     app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["PROPAGATE_EXCEPTIONS"] = True
     app.secret_key = "4CE1E6FD-BD68-4E73-B920-5EE95FD03FEC"
     api = Api(app)
 
+    @app.before_first_request
+    def create_tables():
+        """Initialy create the tables."""
+        db.create_all()
+
+    db.init_app(app)
+
     api.add_resource(AccountCollection, "/account")
     api.add_resource(AddAccount, "/account")
-    api.add_resource(AccountEdit, "/account/<string:account_id>")
+    api.add_resource(Account, "/account/<string:account_uuid>")
 
     api.add_resource(MallCollection, "/mall")
-    api.add_resource(AddMall, "/mall/<string:account_id>")
-    api.add_resource(MallEdit, "/mall/<string:mall_id>")
+    api.add_resource(AddMall, "/mall/<string:account_uuid>")
+    api.add_resource(Mall, "/mall/<string:mall_uuid>")
 
     api.add_resource(UnitCollection, "/unit")
-    api.add_resource(AddUnit, "/unit/<string:mall_id>")
-    api.add_resource(UnitEdit, "/unit/<string:unit_id>")
-
-    create_table()
+    api.add_resource(AddUnit, "/unit/<string:mall_uuid>")
+    api.add_resource(Unit, "/unit/<string:unit_uuid>")
 
     return app
 
