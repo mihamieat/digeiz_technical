@@ -2,6 +2,8 @@ aniso8601==9.0.1
 astroid==2.9.0
 attrs==21.2.0
 backports.entry-points-selectable==1.1.1
+bump2version==1.0.1
+bumpversion==0.6.0
 click==8.0.3
 distlib==0.3.4
 filelock==3.4.0
